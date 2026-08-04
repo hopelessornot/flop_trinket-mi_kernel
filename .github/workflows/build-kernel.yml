@@ -41,13 +41,17 @@ jobs:
       - name: Bagimliliklar
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends lz4 brotli flex bison bc cpio kmod ccache zip unzip libtinfo5 libssl-dev python3 git curl make
+          sudo apt-get install -y --no-install-recommends lz4 brotli flex bison bc cpio kmod ccache zip unzip libtinfo5 libssl-dev python3 git curl make binutils-aarch64-linux-gnu
 
       - name: Build scriptini ortama uyarla
         working-directory: kernel
         run: |
-          sed -i 's/^LOG_UPLOAD=1/LOG_UPLOAD=0/' ckbuild.sh
-          grep -n '^LOG_UPLOAD=' ckbuild.sh
+          ls -la build/ build/scripts/
+          sed -i 's/^LOG_UPLOAD=1/LOG_UPLOAD=0/' build/ckbuild.sh
+          grep -n '^LOG_UPLOAD=' build/ckbuild.sh
+          sed -i "s|curl -F'file=@log.txt' http://0x0.st|true|g" build/scripts/post.sh build/scripts/upload.sh
+          echo "kalan 0x0.st referanslari:"
+          grep -rn "0x0.st" build/scripts/ || echo "  yok"
           : > "$GITHUB_WORKSPACE/chat"
           : > "$GITHUB_WORKSPACE/chat_test"
           : > "$GITHUB_WORKSPACE/bot_token"
@@ -84,14 +88,22 @@ jobs:
         run: |
           OPTS=""
           if [ "${{ inputs.ksu }}" = "true" ]; then OPTS="k"; fi
-          echo "ckbuild.sh ${{ inputs.device }} $OPTS"
-          bash ckbuild.sh "${{ inputs.device }}" "$OPTS"
+          echo "do_build.sh ${{ inputs.device }} $OPTS"
+          bash do_build.sh "${{ inputs.device }}" "$OPTS"
+
+      - name: Ciktilari listele
+        if: always()
+        run: |
+          echo "--- kernel/build ---"; ls -la "$GITHUB_WORKSPACE/kernel/build" 2>/dev/null || true
+          echo "--- workspace ---";    ls -la "$GITHUB_WORKSPACE" 2>/dev/null || true
 
       - name: Kernel zip
         uses: actions/upload-artifact@v4
         with:
           name: FloppyKernel-tuned
-          path: ${{ github.workspace }}/Floppy_*.zip
+          path: |
+            kernel/build/Floppy_*.zip
+            ${{ github.workspace }}/Floppy_*.zip
           if-no-files-found: error
           retention-days: 30
 
