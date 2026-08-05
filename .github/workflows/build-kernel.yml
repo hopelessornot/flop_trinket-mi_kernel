@@ -69,6 +69,26 @@ jobs:
           scripts/config --file $C --disable CONFIG_ZRAM_DEDUP
           scripts/config --file $C --enable  CONFIG_SUSPEND_SKIP_SYNC
           scripts/config --file $C --disable CONFIG_F2FS_STAT_FS
+          # --- v3.2 (2026-08-05): olculmus ek degisiklikler ---
+          # INIT_ON_ALLOC: kernel her bellek ayriminda sayfayi sifirliyordu.
+          # Tipik yukte ~%1-2, ayrim-yogun iste %5-7 maliyet. Zygote fork ve
+          # uygulama acilisi dogrudan hizlanir (kullanicinin 1. onceligi).
+          # Bedeli: baslatilmamis-bellek bilgi sizintisina karsi koruma gider.
+          scripts/config --file $C --disable CONFIG_INIT_ON_ALLOC_DEFAULT_ON
+          # DEBUG_LIST: her list_add/list_del'de butunluk kontrolu. Saf hata
+          # ayiklama yuku, guvenlik etkisi yok.
+          scripts/config --file $C --disable CONFIG_DEBUG_LIST
+          # Bu telefonda donanim karsiligi OLMAYAN suruculer (kullanici teyit etti:
+          # TV tuner yok, oyun kolu yok, USB OTG kullanmiyor).
+          scripts/config --file $C --disable CONFIG_MEDIA_DIGITAL_TV_SUPPORT
+          scripts/config --file $C --disable CONFIG_SND_USB_AUDIO
+          scripts/config --file $C --disable CONFIG_JOYSTICK_XPAD
+          scripts/config --file $C --disable CONFIG_HID_STEAM
+          scripts/config --file $C --disable CONFIG_HID_MAGICMOUSE
+          scripts/config --file $C --disable CONFIG_HID_APPLE
+          scripts/config --file $C --disable CONFIG_HID_WACOM
+          echo "=== v3.2 sonuc ==="
+          grep -E "INIT_ON_ALLOC|DEBUG_LIST|DIGITAL_TV|SND_USB_AUDIO|XPAD|HID_STEAM|HID_APPLE" $C || true
           echo "=== sonuc ==="
           grep -E "TCP_CONG_BBR|DEFAULT_BBR|DEFAULT_CUBIC|NET_SCH_FQ=|CRYPTO_ZSTD|ZRAM_DEDUP|SUSPEND_SKIP_SYNC|F2FS_STAT_FS" $C
 
