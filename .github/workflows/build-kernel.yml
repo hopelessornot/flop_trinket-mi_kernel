@@ -81,7 +81,11 @@ jobs:
           # Bu telefonda donanim karsiligi OLMAYAN suruculer (kullanici teyit etti:
           # TV tuner yok, oyun kolu yok, USB OTG kullanmiyor).
           scripts/config --file $C --disable CONFIG_MEDIA_DIGITAL_TV_SUPPORT
-          scripts/config --file $C --disable CONFIG_SND_USB_AUDIO
+          # !!! CONFIG_SND_USB_AUDIO KAPATILAMAZ - build #3 link asamasinda coktu:
+          # !!!   ld.lld: undefined symbol: find_snd_usb_substream
+          # !!!   ld.lld: undefined symbol: snd_usb_enable_audio_stream
+          # !!! QCOM'un uaudio QMI servisi (techpack/audio) bu sembollere kosulsuz
+          # !!! bagimli. USB ses kullanilmasa da derlemede kalmali.
           scripts/config --file $C --disable CONFIG_JOYSTICK_XPAD
           scripts/config --file $C --disable CONFIG_HID_STEAM
           scripts/config --file $C --disable CONFIG_HID_MAGICMOUSE
